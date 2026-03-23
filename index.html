@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ChronoAI — AI builders. For AI builders.</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#060606;--s1:#101010;--s2:#181818;
+  --b:rgba(255,255,255,0.06);--b2:rgba(255,255,255,0.11);
+  --lime:#b8f724;--ld:rgba(184,247,36,0.09);--ld2:rgba(184,247,36,0.04);
+  --blue:#4f8ef7;--bd:rgba(79,142,247,0.09);
+  --red:#ff4444;
+  --white:#eeeeee;--g1:#707070;--g2:#444;
+  --sans:'Inter',system-ui,sans-serif;
+  --serif:'Playfair Display',Georgia,serif
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--white);font-family:var(--sans);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ENGINE */
+.deck{width:100%;height:100%;position:relative}
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:88px 112px 72px;
+  opacity:0;pointer-events:none;
+  transition:opacity .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1);
+  transform:translateY(14px)
+}
+.slide.active{opacity:1;pointer-events:auto;transform:translateY(0)}
+
+/* TOP BAR */
+.bar{position:fixed;top:26px;left:44px;right:44px;display:flex;justify-content:space-between;align-items:center;z-index:100}
+.logo img{height:28px;object-fit:contain;display:block}
+.logo-fb{display:none;align-items:center;gap:9px}
+.logo-fb .li{width:28px;height:28px;border-radius:6px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff}
+.logo-fb span{font-weight:800;font-size:14px;letter-spacing:.3px}
+.bar-right{display:flex;align-items:center;gap:10px}
+.pill{font-size:10px;color:var(--g1);letter-spacing:1.5px;text-transform:uppercase;background:var(--s1);border:1px solid var(--b);padding:5px 14px;border-radius:20px}
+
+/* LANG TOGGLE */
+.lang-toggle{
+  display:flex;align-items:center;gap:0;
+  background:var(--s1);border:1px solid var(--b);border-radius:20px;overflow:hidden
+}
+.lang-btn{
+  font-size:11px;font-weight:700;letter-spacing:.5px;padding:5px 14px;
+  cursor:pointer;background:none;border:none;color:var(--g1);
+  transition:all .2s
+}
+.lang-btn.active{background:var(--lime);color:var(--bg)}
+.lang-sep{width:1px;background:var(--b);align-self:stretch}
+
+/* PROGRESS */
+.prog{position:fixed;top:0;left:0;height:2px;background:var(--lime);transition:width .4s ease;z-index:200}
+
+/* FOOTER */
+.ctr{position:fixed;bottom:30px;left:44px;font-size:10px;color:var(--g2);letter-spacing:2px;z-index:100}
+.nav{position:fixed;bottom:24px;right:44px;display:flex;gap:10px;z-index:100}
+.nav button{width:40px;height:40px;border-radius:50%;background:var(--s1);border:1px solid var(--b);color:var(--white);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.nav button:hover{background:var(--lime);color:var(--bg);border-color:var(--lime)}
+.nbtn{position:fixed;bottom:68px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--g2);cursor:pointer;letter-spacing:1.5px;text-transform:uppercase;background:none;border:1px solid var(--b);padding:5px 14px;border-radius:20px;z-index:100;transition:all .2s}
+.nbtn:hover{border-color:var(--lime);color:var(--lime)}
+.nbox{position:fixed;bottom:106px;left:50%;transform:translateX(-50%);background:rgba(12,12,12,.97);border:1px solid var(--b);border-radius:14px;padding:18px 24px;max-width:600px;width:92%;font-size:13px;color:rgba(255,255,255,.45);line-height:1.8;z-index:99;display:none;max-height:190px;overflow-y:auto}
+.nbox.on{display:block}
+
+/* TYPE */
+.eye{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--lime);margin-bottom:16px}
+.eye-g{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--g1);margin-bottom:16px}
+h1{font-size:clamp(40px,5.8vw,82px);font-weight:800;line-height:1.03;letter-spacing:-2.5px;text-align:center;max-width:920px}
+h2{font-size:clamp(30px,4vw,60px);font-weight:800;line-height:1.06;letter-spacing:-2px;max-width:840px}
+.it{font-family:var(--serif);font-style:italic}
+.lime{color:var(--lime)}.blue{color:var(--blue)}.ghost{color:rgba(255,255,255,.14)}.red{color:var(--red)}
+.sub{font-size:clamp(15px,1.6vw,20px);color:var(--g1);line-height:1.7;max-width:560px;text-align:center;margin-top:20px;font-weight:400}
+
+/* MANIFESTO */
+.manifesto{max-width:820px;width:100%;text-align:center}
+.ml{font-size:clamp(20px,2.8vw,36px);font-weight:700;line-height:1.5;letter-spacing:-.4px;margin-bottom:4px;opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
+.ml.show{opacity:1;transform:translateY(0)}
+.ml.big{font-size:clamp(26px,3.8vw,50px);font-weight:800;letter-spacing:-1.2px;margin-bottom:0}
+
+/* GRID */
+.g{display:grid;gap:14px;width:100%;max-width:960px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+.card{background:var(--s1);border:1px solid var(--b);border-radius:16px;padding:26px 30px;transition:border-color .25s}
+.card:hover{border-color:var(--b2)}
+.card.gl{border-color:rgba(184,247,36,.14);background:var(--ld2)}
+.card.gb{border-color:rgba(79,142,247,.13);background:rgba(79,142,247,.02)}
+.card.gr{border-color:rgba(255,68,68,.14);background:rgba(255,68,68,.025)}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:11px}
+.tl{background:var(--ld);color:var(--lime)}.tb{background:var(--bd);color:var(--blue)}.tr{background:rgba(255,68,68,.1);color:var(--red)}
+.card h3{font-size:17px;font-weight:700;margin-bottom:7px;letter-spacing:-.3px}
+.card p{font-size:13.5px;color:var(--g1);line-height:1.65}
+
+/* STATUS BADGE */
+.status{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+.status-live{background:rgba(184,247,36,.12);color:var(--lime);border:1px solid rgba(184,247,36,.2)}
+.status-mvp{background:rgba(79,142,247,.1);color:var(--blue);border:1px solid rgba(79,142,247,.2)}
+.status-dot{width:6px;height:6px;border-radius:50%}
+.live-dot{background:var(--lime);animation:blink 2s infinite}
+.mvp-dot{background:var(--blue)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* SPLIT */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:52px;max-width:1020px;align-items:start;width:100%}
+
+/* TENSION */
+.tension-head{font-size:clamp(22px,3vw,44px);font-weight:800;line-height:1.15;letter-spacing:-1.5px;text-align:center;max-width:780px;margin-bottom:32px}
+
+/* CODE */
+.code{font-family:monospace;font-size:12px;line-height:2.1;padding:16px 20px;background:var(--s2);border-radius:11px;color:var(--g1)}
+
+/* DEMO BOX */
+.dbox{background:var(--s1);border:1px solid var(--b);border-radius:17px;padding:26px 28px;position:relative;overflow:hidden}
+.dbox::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 30%,rgba(184,247,36,.035),transparent 60%);pointer-events:none}
+.dlabel{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--lime);margin-bottom:12px}
+
+/* NOTIF */
+.notif{background:#141414;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px 22px;width:100%;max-width:320px}
+.ndot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:blink 1.8s infinite}
+.nbtns{display:flex;gap:10px;margin-top:16px}
+.byes{flex:1;padding:10px;border-radius:8px;background:rgba(184,247,36,.1);color:var(--lime);border:1px solid rgba(184,247,36,.2);font-weight:700;font-size:13px;cursor:pointer}
+.bno{flex:1;padding:10px;border-radius:8px;background:rgba(255,68,68,.08);color:var(--red);border:1px solid rgba(255,68,68,.16);font-weight:700;font-size:13px;cursor:pointer}
+
+/* CTA */
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--lime);color:var(--bg);font-size:15px;font-weight:800;letter-spacing:-.2px;padding:15px 36px;border-radius:50px;border:none;cursor:pointer;margin-top:30px;transition:transform .2s,box-shadow .2s}
+.cta:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(184,247,36,.2)}
+.rule{width:1px;background:var(--b);align-self:stretch}
+.ghost-bg{position:absolute;font-size:clamp(100px,16vw,220px);font-weight:900;color:rgba(255,255,255,.02);font-family:var(--serif);letter-spacing:-6px;pointer-events:none;user-select:none;line-height:1}
+
+/* ZH: slightly looser tracking for Chinese */
+body.zh-mode .ml,.zh-mode h1,.zh-mode h2,.zh-mode .tension-head{letter-spacing:-.5px}
+body.zh-mode .card h3{letter-spacing:0}
+
+/* ── SLIDE NUMBERS ───────────────────────── */
+.ctr{font-size:12px!important;color:var(--g1)!important;letter-spacing:2.5px!important}
+
+/* ── GRAIN TEXTURE OVERLAY ───────────────── */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:128px}
+
+/* ── COVER GLOW ──────────────────────────── */
+@keyframes coverGlow{0%,100%{opacity:.35;transform:translate(-50%,-50%) scale(1)}50%{opacity:.65;transform:translate(-50%,-50%) scale(1.1)}}
+.cover-glow{position:absolute;width:700px;height:500px;border-radius:50%;background:radial-gradient(ellipse,rgba(184,247,36,.07) 0%,transparent 68%);pointer-events:none;animation:coverGlow 6s ease-in-out infinite;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0}
+.cover-glow2{position:absolute;width:400px;height:300px;border-radius:50%;background:radial-gradient(ellipse,rgba(79,142,247,.04) 0%,transparent 68%);pointer-events:none;top:60%;left:30%;z-index:0}
+
+/* ── NEWS BROWSER MOCKUP ─────────────────── */
+.nm-wrap{border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.09);box-shadow:0 12px 40px rgba(0,0,0,.7),0 2px 8px rgba(0,0,0,.5);transition:transform .3s,box-shadow .3s;flex:1;display:flex;flex-direction:column}
+.nm-wrap:hover{transform:translateY(-4px);box-shadow:0 18px 52px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.12)}
+.nm-top{background:#222;padding:8px 14px;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.nmd{width:9px;height:9px;border-radius:50%;display:inline-block}
+.nmd:nth-child(1){background:#ff5f57}.nmd:nth-child(2){background:#febc2e}.nmd:nth-child(3){background:#28c840}
+.nm-url{flex:1;text-align:center;font-size:10px;color:rgba(255,255,255,.25);font-family:var(--sans);letter-spacing:.2px}
+.nm-body{flex:1;display:flex;flex-direction:column;gap:8px;padding:20px 22px}
+
+/* ── NEWS CARD ENTRANCE ANIMATION ────────── */
+.nc-card{opacity:0;transform:translateY(32px) scale(.98);transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1),box-shadow .3s}
+.nc-card.in{opacity:1;transform:translateY(0) scale(1)}
+.nc-chip{opacity:0;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease}
+.nc-chip.in{opacity:1;transform:translateY(0)}
+.nc-eyebrow{opacity:0;transform:translateY(-8px);transition:opacity .5s ease,transform .5s ease}
+.nc-eyebrow.in{opacity:1;transform:translateY(0)}
+
+/* ── SCAN LINE (s4b atmospheric) ─────────── */
+@keyframes scanLine{0%{top:-2%;opacity:.9}80%{opacity:.6}100%{top:102%;opacity:0}}
+.scan-line{position:absolute;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(255,68,68,.5) 40%,rgba(255,68,68,.5) 60%,transparent 100%);pointer-events:none;z-index:2;top:-2%;animation:scanLine 2.8s ease-out 0.3s 1 forwards;opacity:0}
+
+/* ── RED AMBIENT ON s4b ──────────────────── */
+.red-glow{position:absolute;width:800px;height:300px;border-radius:50%;background:radial-gradient(ellipse,rgba(255,68,68,.05) 0%,transparent 65%);pointer-events:none;top:40%;left:50%;transform:translateX(-50%);z-index:0}
+
+/* ── LIME GLOW on product cards ──────────── */
+.card.gl{box-shadow:0 0 40px rgba(184,247,36,.04),inset 0 0 40px rgba(184,247,36,.02)}
+.card.gb{box-shadow:0 0 40px rgba(79,142,247,.04),inset 0 0 40px rgba(79,142,247,.02)}
+
+/* ── DOT PROGRESS ────────────────────────── */
+.dots{position:fixed;bottom:31px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:101;align-items:center}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--g2);transition:all .3s;cursor:pointer}
+.dot.on{background:var(--lime);width:16px;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="prog" id="prog"></div>
+
+<div class="bar">
+  <div class="logo">
+    <img src="https://event-decks.chrono-ai.fun/logo/chronoai-logo.png" alt="ChronoAI"
+         onerror="this.style.display='none';document.getElementById('lfb').style.display='flex'"/>
+    <div class="logo-fb" id="lfb"><div class="li">C</div><span>ChronoAI</span></div>
+  </div>
+  <div class="bar-right">
+    <div class="pill" data-i18n="pill">What's Next Ep01</div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btnEN" onclick="setLang('en')">EN</button>
+      <div class="lang-sep"></div>
+      <button class="lang-btn" id="btnZH" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</div>
+
+<div class="deck">
+
+  <!-- ① COVER -->
+  <div class="slide active" data-notes-en="Good evening. Welcome, and thank you for being here. My name is Wendy — Brand Director at ChronoAI. We are first up tonight, and I want to use our six minutes well. I am not going to pitch at you. I want to tell you our story — where we came from, why we built what we built, and why every single person in this room is exactly who we built it for." data-notes-zh="晚上好。欢迎来到这里，感谢大家的到来。我叫 Wendy，是 ChronoAI 的品牌总监。今晚我们第一个上台，我想好好利用这六分钟。我不打算向大家推销。我想分享我们的故事——我们从哪里来，为什么建造这些，以及为什么在座的每一个人，正是我们为之而建的人。">
+    <div class="cover-glow"></div>
+    <div class="cover-glow2"></div>
+    <div class="ghost-bg" style="bottom:-60px;right:-60px;font-size:clamp(160px,22vw,320px);opacity:.018">AI</div>
+    <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center">
+      <div class="eye" data-i18n="s1_eye">ChronoAI &nbsp;·&nbsp; 2026</div>
+      <h1>
+        <span class="it lime" data-i18n="s1_h1a">AI builders.</span><br/>
+        <span data-i18n="s1_h1b">For AI builders.</span>
+      </h1>
+      <div class="sub" style="margin-top:28px;font-size:clamp(17px,1.9vw,24px);color:rgba(255,255,255,0.32);font-weight:500;letter-spacing:-.2px" data-i18n="s1_sub">The age of the one-person company is now.</div>
+    </div>
+  </div>
+
+  <!-- ② MANIFESTO -->
+  <div class="slide" id="manifesto-slide" data-notes-en="This slide is about who we are for. Read slowly. Let each line breathe. These are the people in this room. Let them feel it." data-notes-zh="这张幻灯片说的是我们为谁而建。语速放慢，让每一行都留有空间。台下的人，就是这些人。让他们有所感触。">
+    <div class="ghost-bg" style="bottom:-40px;right:-20px">C</div>
+    <div class="manifesto" id="manifesto">
+      <div class="eye-g" style="margin-bottom:28px" data-i18n="s2_eye">Who ChronoAI is for</div>
+      <div class="ml" style="transition-delay:.05s" data-i18n="s2_l1"><span class="ghost">Here is to</span> the solo founder</div>
+      <div class="ml" style="transition-delay:.2s" data-i18n="s2_l2">who ships faster than a team of ten.</div>
+      <div class="ml" style="transition-delay:.38s;margin-top:16px" data-i18n="s2_l3"><span class="ghost">Here is to</span> the one-person company</div>
+      <div class="ml" style="transition-delay:.52s" data-i18n="s2_l4">building what used to take <span class="it lime">fifty people</span>.</div>
+      <div class="ml" style="transition-delay:.7s;margin-top:16px" data-i18n="s2_l5"><span class="ghost">Here is to</span> every builder who</div>
+      <div class="ml" style="transition-delay:.84s" data-i18n="s2_l6">bet on AI before the world caught up.</div>
+      <div class="ml big" style="transition-delay:1.1s;margin-top:38px" data-i18n="s2_l7"><span class="it lime">We build for you.</span></div>
+    </div>
+  </div>
+
+  <!-- ③ ORIGIN STORY -->
+  <div class="slide" data-notes-en="ChronoAI did not start by deciding to build infrastructure. We started by building products. Consumer apps, real tools. Every time we pushed an AI agent into production, we hit the same two walls. Where do agents find new capabilities? No answer. How do we give agents real access without handing them the keys to our entire system? No answer. So we built the answer. Ornn and NyxID were not strategic decisions — they were built because we needed them. Now they belong to every builder who hits the same walls." data-notes-zh="ChronoAI 一开始并不是要做基础设施。我们从做产品开始——消费级应用，真实的工具。每次我们把 AI 代理推上生产环境，都会撞上同样的两堵墙。代理如何发现新能力？没有答案。如何在不暴露所有密钥的情况下给代理授权？也没有答案。于是我们自己造了答案。Ornn 和 NyxID 不是战略决策——它们是因为我们自己需要它们才诞生的。现在，它们属于每一个撞上同样这堵墙的构建者。">
+    <div class="eye-g" data-i18n="s3_eye">How we got here</div>
+    <div class="split">
+      <div>
+        <h2 style="font-size:clamp(24px,3vw,44px);margin-bottom:22px" data-i18n="s3_h2">We did not build infrastructure first.<br/><span class="it lime">We built products.</span></h2>
+        <div style="font-size:16px;color:var(--g1);line-height:1.85">
+          <p style="margin-bottom:14px" data-i18n="s3_p1">ChronoAI started as a product maker. Consumer apps. Tools people actually use. We built with AI because we believed in what it could do.</p>
+          <p data-i18n="s3_p2">Then we hit the walls every AI builder hits. The tools we needed simply did not exist. So we built them. Not for a market opportunity. <span style="color:var(--white);font-weight:600">Because we were missing them ourselves.</span></p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card" style="padding:22px 26px">
+          <div class="tag tr" data-i18n="s3_t1">Wall 01</div>
+          <h3 data-i18n="s3_c1h">No standard way to share skills</h3>
+          <p data-i18n="s3_c1p">Every agent capability we needed, we rebuilt from scratch. Same as 10,000 other teams. No registry. No standard. No sharing.</p>
+        </div>
+        <div class="card" style="padding:22px 26px">
+          <div class="tag tr" data-i18n="s3_t2">Wall 02</div>
+          <h3 data-i18n="s3_c2h">No safe way to give agents access</h3>
+          <p data-i18n="s3_c2p">Keys in .env files. Agents with broad access. No approval layer. No audit trail. One bad deploy away from disaster.</p>
+        </div>
+        <div class="card gl" style="padding:22px 26px">
+          <div class="tag tl" data-i18n="s3_t3">Our answer</div>
+          <h3 data-i18n="s3_c3h">We built Ornn and NyxID</h3>
+          <p data-i18n="s3_c3p">The infrastructure we needed. Now it belongs to every builder who faces the same walls.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ OPENCLAW + BUT -->
+  <div class="slide" data-notes-en="Now let me talk directly to where you are. You are using OpenClaw. And at some point you thought: what if I ran my entire business on agents? That is not a fantasy. That is where this is heading. BUT — the moment agents start doing real things, three questions appear that will stop you cold if you have not answered them." data-notes-zh="现在让我直接说到你们的处境。你们在使用 OpenClaw。在某个时刻你想到：如果我的整个业务都由 AI 代理来运营，会怎样？这不是幻想，这正是未来的方向。但是——当代理开始做真实的事情，三个问题就会出现，如果你还没回答它们，就会让你措手不及。">
+    <div class="ghost-bg" style="bottom:-60px;left:-40px;opacity:.5">?</div>
+    <div class="tension-head" data-i18n="s4_head">
+      You are using OpenClaw.<br/>
+      You are thinking: <span class="it lime">what if agents<br/>ran my entire business?</span>
+    </div>
+    <div style="max-width:720px;text-align:center;margin-bottom:20px;padding:16px 28px;border-radius:14px;background:rgba(255,68,68,0.05);border:1px solid rgba(255,68,68,0.12)">
+      <p style="font-size:15px;line-height:1.7;color:rgba(255,255,255,0.6)" data-i18n="s4_gun">Using an AI agent like OpenClaw without security is like giving your AI a loaded gun. AI agents no longer just carry out tasks — they make decisions and take real actions.</p>
+    </div>
+    <div style="font-size:13px;color:var(--g2);font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:18px" data-i18n="s4_but">BUT</div>
+    <div class="g g3" style="max-width:900px">
+      <div class="card gr">
+        <div class="tag tr" data-i18n="s4_t1">Question 1</div>
+        <h3 data-i18n="s4_c1h">Where are your API keys?</h3>
+        <p data-i18n="s4_c1p">Probably in a .env file, a CI pipeline, or a Slack message. If that leaks, an attacker acts like your entire app.</p>
+      </div>
+      <div class="card gr">
+        <div class="tag tr" data-i18n="s4_t2">Question 2</div>
+        <h3 data-i18n="s4_c2h">What is your brake pedal?</h3>
+        <p data-i18n="s4_c2p">Your agent can send emails, process refunds, write to production. When it does something wrong, what stops it?</p>
+      </div>
+      <div class="card gr">
+        <div class="tag tr" data-i18n="s4_t3">Question 3</div>
+        <h3 data-i18n="s4_c3h">Who builds the tools?</h3>
+        <p data-i18n="s4_c3p">Every agent capability is hard-coded from scratch. You, and 10,000 other teams, rebuilding the same code this week.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④b ALREADY HAPPENING -->
+  <div class="slide" data-notes-en="This is not a hypothetical. While we are standing here talking, AI agents are already booking flights, making purchases, sending emails, accessing CRMs, processing refunds — with whatever access someone gave them. And the headlines are already writing themselves. 135,000 OpenClaw AI agents were found openly exposed online with zero authentication. An AI agent deleted 200 emails in a single run — nobody authorized that. Foreign Policy ran a feature on why OpenClaw mania has become more than a tech craze. And these are just the ones that made the news. The question is not whether your agents will take real actions. They already are. The question is whether you have any guardrails when they do." data-notes-zh="这不是假设。就在我们站在这里说话的时候，AI Agent 已经在帮人订机票、下单购物、发邮件、操作 CRM、处理退款——用你给它们的任何权限。新闻头条已经开始出现了。13.5 万个 OpenClaw AI Agent 被发现在网上完全暴露，没有任何身份验证。一个 AI Agent 一次性删掉了 200 封邮件——没有人授权这件事。《外交政策》也专题报道了 OpenClaw 的狂热。而且这些还只是上了新闻的案例。问题不是你的 Agent 会不会采取真实行动，它们已经在了。问题是，当它们出手的时候，你有没有任何防线。">
+    <div class="scan-line"></div>
+    <div class="red-glow"></div>
+
+    <div class="nc-eyebrow" style="transition-delay:.05s">
+      <div class="eye-g" data-i18n="s4b_eye">Already happening</div>
+    </div>
+    <h2 class="nc-eyebrow" style="text-align:center;font-size:clamp(22px,2.8vw,40px);margin-bottom:28px;transition-delay:.15s" data-i18n="s4b_h">The headlines are already<br/><span class="it" style="color:rgba(255,68,68,0.85)">writing themselves</span></h2>
+
+    <!-- NEWS BROWSER MOCKUPS -->
+    <div style="display:flex;gap:14px;max-width:1020px;width:100%;margin-bottom:22px;align-items:stretch;position:relative;z-index:1">
+
+      <!-- Bitdefender -->
+      <div class="nm-wrap nc-card" style="transition-delay:.12s">
+        <div class="nm-top">
+          <span class="nmd"></span><span class="nmd"></span><span class="nmd"></span>
+          <span class="nm-url">bitdefender.com</span>
+        </div>
+        <div class="nm-body" style="background:#06060f">
+          <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a8fe8;padding-bottom:2px">INDUSTRY NEWS &nbsp;·&nbsp; 2 min read</div>
+          <div style="font-size:15px;font-weight:900;color:#fff;line-height:1.22;font-family:var(--sans)" data-i18n="s4b_n1h">135,000+ OpenClaw AI agents exposed online as misconfiguration fuels takeover risk</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.42);line-height:1.55;margin-top:4px" data-i18n="s4b_n1p">Tens of thousands of OpenClaw Agent instances found openly accessible with no authentication — API keys and full system access visible to anyone.</div>
+          <a href="https://www.bitdefender.com/en-us/blog/hotforsecurity/135k-openclaw-ai-agents-exposed-online" target="_blank" style="font-size:10px;color:rgba(79,142,247,.65);text-decoration:none;margin-top:auto;display:block;padding-top:8px" data-i18n="s4b_src">bitdefender.com →</a>
+        </div>
+      </div>
+
+      <!-- PCWorld -->
+      <div class="nm-wrap nc-card" style="transition-delay:.28s">
+        <div class="nm-top">
+          <span class="nmd"></span><span class="nmd"></span><span class="nmd"></span>
+          <span class="nm-url">pcworld.com</span>
+        </div>
+        <div class="nm-body" style="background:#f6f6f6">
+          <div style="font-size:15px;font-weight:900;color:#c01414;font-family:var(--sans);letter-spacing:-.3px;line-height:1">PCWorld</div>
+          <div style="font-size:8px;font-weight:800;color:#c01414;letter-spacing:1.5px;text-transform:uppercase;padding-top:2px">OPINION</div>
+          <div style="font-size:15px;font-weight:800;color:#111;line-height:1.22;font-family:var(--sans);padding-top:2px" data-i18n="s4b_n2h">Her AI agent nuked 200 emails. This guardrail stops the next disaster</div>
+          <div style="font-size:9.5px;color:#888;padding-top:2px;font-family:var(--sans)">By Ben Patterson &nbsp;·&nbsp; Feb 24, 2026</div>
+          <div style="font-size:11px;color:#555;line-height:1.5;padding-top:2px" data-i18n="s4b_n2p">An AI agent autonomously deleted 200 emails in a single session. No human approved it. It just ran — because nothing was stopping it.</div>
+          <a href="https://www.pcworld.com/article/3070207/an-ai-agent-nuked-200-emails-this-guardrail-stops-the-next-disaster.html" target="_blank" style="font-size:10px;color:#c01414;text-decoration:none;margin-top:auto;display:block;padding-top:8px" data-i18n="s4b_src2">pcworld.com →</a>
+        </div>
+      </div>
+
+      <!-- Foreign Policy -->
+      <div class="nm-wrap nc-card" style="transition-delay:.44s">
+        <div class="nm-top">
+          <span class="nmd"></span><span class="nmd"></span><span class="nmd"></span>
+          <span class="nm-url">foreignpolicy.com</span>
+        </div>
+        <div class="nm-body" style="background:#fff">
+          <div style="font-size:8.5px;font-weight:600;color:#666;letter-spacing:.3px;font-family:Georgia,serif">CHINA POWER &nbsp;|&nbsp; SOCIETY &nbsp;|&nbsp; EAST ASIA</div>
+          <div style="font-size:16px;font-weight:900;color:#111;line-height:1.2;font-family:Georgia,serif;padding-top:4px" data-i18n="s4b_n3h">Why China's OpenClaw Mania Is More Than Just a Tech Craze</div>
+          <div style="font-size:11px;color:#555;line-height:1.5;padding-top:4px" data-i18n="s4b_n3p">Local governments and tech conglomerates were the deliberate architects of the enthusiasm, while the central government was forced to hit the brakes.</div>
+          <a href="https://foreignpolicy.com/2025/04/07/china-openclaw-ai-security/" target="_blank" style="font-size:10px;color:#333;text-decoration:none;margin-top:auto;display:block;padding-top:8px" data-i18n="s4b_src3">foreignpolicy.com →</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- WHAT AGENTS CAN DO -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:860px;position:relative;z-index:1">
+      <div class="nc-eyebrow" style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g2);width:100%;text-align:center;margin-bottom:2px;transition-delay:.58s" data-i18n="s4b_sub">AI Agents are already doing this — right now</div>
+      <span class="nc-chip" style="font-size:13px;padding:7px 16px;border-radius:20px;background:var(--s2);border:1px solid var(--b);transition-delay:.64s" data-i18n="s4b_a1">✈️ Book your flights</span>
+      <span class="nc-chip" style="font-size:13px;padding:7px 16px;border-radius:20px;background:var(--s2);border:1px solid var(--b);transition-delay:.72s" data-i18n="s4b_a2">💳 Make purchases</span>
+      <span class="nc-chip" style="font-size:13px;padding:7px 16px;border-radius:20px;background:var(--s2);border:1px solid var(--b);transition-delay:.80s" data-i18n="s4b_a3">📧 Send emails as you</span>
+      <span class="nc-chip" style="font-size:13px;padding:7px 16px;border-radius:20px;background:var(--s2);border:1px solid var(--b);transition-delay:.88s" data-i18n="s4b_a4">💰 Process refunds</span>
+      <span class="nc-chip" style="font-size:13px;padding:7px 16px;border-radius:20px;background:var(--s2);border:1px solid var(--b);transition-delay:.96s" data-i18n="s4b_a5">🔑 Access all your accounts</span>
+      <span class="nc-chip" style="font-size:13px;padding:7px 16px;border-radius:20px;background:var(--s2);border:1px solid var(--b);transition-delay:1.04s" data-i18n="s4b_a6">🗑️ Delete your data</span>
+    </div>
+  </div>
+
+  <!-- ⑤ TWO PRODUCTS -->
+  <div class="slide" data-notes-en="We built the answers to those three questions. Ornn is live today — think of it as npm but for what AI agents can do. Create a skill once, publish it, any agent discovers and runs it in an isolated sandbox. No more rebuilding from scratch. NyxID is in MVP phase — your API keys never touch your code. NyxID holds all 19 providers encrypted, injects the right one at runtime. One LLM gateway for every AI model. And before any agent takes a real action, a human approves or denies it on their phone. Together: the complete foundation for running your business on agents." data-notes-zh="我们造出了那三个问题的答案。Ornn 现在已经可以使用——把它想象成 npm，但针对 AI 代理能力。技能创建一次，发布出去，任何代理都能在沙箱中发现并运行它。不再需要从零重建。NyxID 目前处于 MVP 阶段——你的 API 密钥永远不会出现在代码里。NyxID 将 19 个服务商的密钥加密保存，在运行时按需注入。统一的 LLM 网关连接所有 AI 模型。在代理执行任何真实操作之前，人类先在手机上审批或拒绝。合在一起：这就是用代理运营你的业务所需的完整基础。">
+    <div class="eye" data-i18n="s5_eye">Our answer</div>
+    <div style="font-family:var(--serif);font-style:italic;font-size:clamp(18px,2.2vw,28px);color:rgba(255,255,255,0.5);text-align:center;margin-bottom:28px;letter-spacing:-.3px" data-i18n="s5_ql">OpenClaw makes agents useful. NyxID makes them safe.</div>
+    <div class="g g2" style="max-width:860px">
+      <div class="card gl" style="padding:30px 32px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div class="tag tl" style="margin-bottom:0" data-i18n="s5_t1">Capability</div>
+          <div class="status status-live"><div class="status-dot live-dot"></div><span data-i18n="s5_ornn_status">Live</span></div>
+        </div>
+        <h2 style="font-size:30px;margin-bottom:12px;margin-top:8px">Ornn</h2>
+        <p style="font-size:14.5px;line-height:1.78;margin-bottom:16px" data-i18n="s5_ornn_p">The skill registry for AI agents. Like npm, but for what agents can do. Create skills once, share them, run them in a sandboxed environment. Any agent. Any team. Stop rebuilding. Start compounding.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px">
+          <span style="font-size:11px;padding:3px 11px;border-radius:20px;background:var(--ld);color:var(--lime)" data-i18n="s5_o1">Semantic search</span>
+          <span style="font-size:11px;padding:3px 11px;border-radius:20px;background:var(--ld);color:var(--lime)" data-i18n="s5_o2">Sandboxed runtime</span>
+          <span style="font-size:11px;padding:3px 11px;border-radius:20px;background:var(--ld);color:var(--lime)" data-i18n="s5_o3">AI skill generation</span>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--lime)">ornn.chrono-ai.fun →</div>
+      </div>
+      <div class="card gb" style="padding:30px 32px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div class="tag tb" style="margin-bottom:0" data-i18n="s5_t2">Control</div>
+          <div class="status status-mvp"><div class="status-dot mvp-dot"></div><span data-i18n="s5_nyx_status">MVP Phase</span></div>
+        </div>
+        <h2 style="font-size:30px;margin-bottom:12px;margin-top:8px">NyxID</h2>
+        <p style="font-size:14.5px;line-height:1.78;margin-bottom:16px" data-i18n="s5_nyx_p">Guard the boundary. Keys never live in code. 19 providers brokered at runtime. One LLM gateway for every AI model. Before any agent takes a real action, a human approves it first. Self-hosted. Open source. MIT licensed.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px">
+          <span style="font-size:11px;padding:3px 11px;border-radius:20px;background:var(--bd);color:var(--blue)" data-i18n="s5_n1">Credential broker</span>
+          <span style="font-size:11px;padding:3px 11px;border-radius:20px;background:var(--bd);color:var(--blue)" data-i18n="s5_n2">LLM gateway</span>
+          <span style="font-size:11px;padding:3px 11px;border-radius:20px;background:var(--bd);color:var(--blue)" data-i18n="s5_n3">Human approval</span>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--blue)">nyx.chrono-ai.fun →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ DEMO BREAK -->
+  <div class="slide" data-notes-en="Enough words. Three minutes. Three real things. I promise each one will change how you think about what you are building." data-notes-zh="说够了。三分钟，三件真实的事。我保证，每一件都会改变你对自己正在构建之事的看法。">
+    <div class="ghost-bg" style="bottom:-20px;right:-40px">→</div>
+    <div class="eye-g" data-i18n="s6_eye">Live demo</div>
+    <h1 style="font-size:clamp(48px,7.5vw,108px)" data-i18n="s6_h1">Watch<br/><span class="it lime">this.</span></h1>
+    <div class="sub" data-i18n="s6_sub">Three minutes. Three real flows.<br/>No jargon. Just what it actually does.</div>
+  </div>
+
+  <!-- ⑦ THE DEMO -->
+  <div class="slide" data-notes-en="BEAT 1 — Keys. Point left. This is what most of you have right now. If that repo leaks, game over. With NyxID, zero keys in code. 19 providers encrypted, injected at the exact moment needed. Nothing to steal. BEAT 2 — Gateway. One NyxID endpoint instead of wiring every provider separately. Switch models, apply policy, log every call — all in one place. Zero code changes. BEAT 3 — This is the wow moment. Your OpenClaw agent wants to send a refund email. Before it fires, NyxID sends this notification. Wendy taps Approve or Deny. The agent can draft, queue, propose. It cannot act without a yes. That is your brake pedal." data-notes-zh="节奏一——密钥。指向左边。这是你们大多数人现在的状态。如果代码库泄露，游戏结束。用了 NyxID，代码里零密钥。19 个服务商加密保存，在需要的那一刻注入，没有任何东西可以被盗取。节奏二——网关。不再分别接入每个服务商，而是指向一个 NyxID 端点。切换模型、应用策略、记录每次调用——全在一处。代码零改动。节奏三——这是惊艳的时刻。你的 OpenClaw 代理想发一封退款邮件。在它执行之前，NyxID 发出这条通知。Wendy 点击批准或拒绝。代理可以起草、排队、提议，但没有人说"是"，它就不能行动。这就是你的刹车。">
+    <div style="display:flex;gap:16px;align-items:stretch;max-width:1060px;width:100%">
+      <div class="dbox" style="flex:1.1">
+        <div class="dlabel" data-i18n="s7_d1label">01 — Keys never in code</div>
+        <div class="code" style="margin-bottom:9px">
+          <div style="color:var(--g2);margin-bottom:3px" data-i18n="s7_before">// Before — danger</div>
+          <div style="color:var(--red)">OPENAI_KEY=sk-proj-a8f2…</div>
+          <div style="color:var(--red)">STRIPE_KEY=sk_live_9xk…</div>
+        </div>
+        <div class="code">
+          <div style="color:var(--g2);margin-bottom:3px" data-i18n="s7_after">// With NyxID</div>
+          <div style="color:var(--lime)">NYXID_URL=id.your.co</div>
+          <div style="color:rgba(184,247,36,.3)" data-i18n="s7_comment">// nothing else needed.</div>
+        </div>
+        <div style="margin-top:14px;font-size:12.5px;color:var(--g1);line-height:1.65" data-i18n="s7_d1note">19 providers pre-configured. Keys injected at runtime. Zero exposed anywhere.</div>
+      </div>
+      <div class="dbox" style="flex:.8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+        <div class="dlabel" data-i18n="s7_d2label">02 — One LLM gateway</div>
+        <div style="display:flex;flex-direction:column;gap:6px;width:100%;margin-bottom:11px">
+          <div style="font-size:12px;padding:7px 14px;background:var(--s2);border-radius:7px;color:var(--g1)">OpenAI</div>
+          <div style="font-size:12px;padding:7px 14px;background:var(--s2);border-radius:7px;color:var(--g1)">Anthropic</div>
+          <div style="font-size:12px;padding:7px 14px;background:var(--s2);border-radius:7px;color:var(--g1)">Google · Mistral · more</div>
+        </div>
+        <div style="font-size:18px;color:var(--lime);margin-bottom:7px">↕</div>
+        <div style="padding:9px 16px;border-radius:9px;border:1px solid rgba(184,247,36,.18);font-size:12px;font-weight:700;color:var(--lime);background:var(--ld)">NyxID Gateway</div>
+        <div style="margin-top:11px;font-size:12px;color:var(--g1)" data-i18n="s7_d2note">One endpoint. Switch providers.<br/>Zero code changes.</div>
+      </div>
+      <div class="dbox" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div class="dlabel" style="text-align:center" data-i18n="s7_d3label">03 — Agents ask first</div>
+        <div class="notif">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">
+            <div class="ndot"></div>
+            <div style="font-size:13px;font-weight:700" data-i18n="s7_ntitle">NyxID &nbsp;·&nbsp; Approval needed</div>
+          </div>
+          <div style="font-size:12px;color:var(--g1);margin-bottom:3px" data-i18n="s7_nsub">support-bot wants to:</div>
+          <div style="font-size:15px;font-weight:700" data-i18n="s7_nact">"Send refund email to customer"</div>
+          <div class="nbtns">
+            <button class="byes" data-i18n="s7_yes">Approve</button>
+            <button class="bno" data-i18n="s7_no">Deny</button>
+          </div>
+        </div>
+        <div style="margin-top:13px;font-size:12.5px;color:var(--g1);text-align:center;line-height:1.65" data-i18n="s7_d3note">The agent proposes.<br/>The human decides. <span style="color:var(--white);font-weight:700">Every time.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑧ CTA -->
+  <div class="slide" data-notes-en="Here is the invitation. Tonight we are opening a limited seeding member program. We are not looking for passive users. We want the builders who will push these tools, break them, and tell us what they actually need. As a seeding member you get early access to Ornn and NyxID, a direct line to our team, and a real voice in what ChronoAI becomes. You are the solo founders, the one-person companies, the AI builders this was built for. Sign up tonight. And stay for the next three demos — incredible builders are coming up right after us. Thank you." data-notes-zh="这是一份邀请。今晚我们开放有限名额的种子用户计划。我们不是在寻找被动的用户，而是那些会真正推动这些工具、发现问题、并告诉我们他们真正需要什么的构建者。作为种子用户，你将获得 Ornn 和 NyxID 的早期访问权、与我们团队的直接沟通渠道，以及真正影响 ChronoAI 未来方向的发言权。你们——独立创业者、一人公司、AI 构建者——正是我们为之而建的人。今晚就报名。留下来看接下来三支团队的演示，他们都在做令人惊叹的事情。谢谢。">
+    <div class="eye" data-i18n="s8_eye">Join us</div>
+    <h1 style="font-size:clamp(32px,4.5vw,62px)" data-i18n="s8_h1">Be the builders who got<br/>it right <span class="it lime">from day one</span></h1>
+    <div class="sub" data-i18n="s8_sub">Limited seeding member access opens tonight. Early product access, a direct line to our team, and a real voice in what we build next.</div>
+    <button class="cta" data-i18n="s8_cta" onclick="window.open('https://luma.com/6x5x0zoy','_blank')">Sign up as a seeding member →</button>
+    <div style="margin-top:40px;display:flex;gap:32px;justify-content:center;flex-wrap:wrap;align-items:center">
+      <div style="text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--g2);margin-bottom:5px" data-i18n="s8_l1a">You get</div>
+        <div style="font-size:14px;font-weight:700" data-i18n="s8_l1b">Early access to Ornn + NyxID</div>
+      </div>
+      <div class="rule"></div>
+      <div style="text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--g2);margin-bottom:5px" data-i18n="s8_l2a">We need</div>
+        <div style="font-size:14px;font-weight:700" data-i18n="s8_l2b">Your feedback. Your real use cases.</div>
+      </div>
+      <div class="rule"></div>
+      <div style="text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--g2);margin-bottom:5px" data-i18n="s8_l3a">Built for</div>
+        <div style="font-size:14px;font-weight:700" data-i18n="s8_l3b">AI builders. Solo founders. You.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<div class="ctr" id="ctr">01 / 08</div>
+<button class="nbtn" id="nbtn">Speaker Notes</button>
+<div class="nbox" id="nbox"></div>
+<div class="nav"><button id="prev">←</button><button id="next">→</button></div>
+
+<script>
+// ─── TRANSLATIONS ────────────────────────────────────────────────
+const T = {
+  en: {
+    pill:"What's Next Ep01",
+    s1_eye:'ChronoAI &nbsp;·&nbsp; 2026',
+    s1_h1a:'AI builders.',
+    s1_h1b:'For AI builders.',
+    s1_sub:'The age of the one-person company is now.',
+    s2_eye:'Who ChronoAI is for',
+    s2_l1:'<span class="ghost">Here is to</span> the solo founder',
+    s2_l2:'who ships faster than a team of ten.',
+    s2_l3:'<span class="ghost">Here is to</span> the one-person company',
+    s2_l4:'building what used to take <span class="it lime">fifty people</span>.',
+    s2_l5:'<span class="ghost">Here is to</span> every builder who',
+    s2_l6:'bet on AI before the world caught up.',
+    s2_l7:'<span class="it lime">We build for you.</span>',
+    s3_eye:'How we got here',
+    s3_h2:'We did not build infrastructure first.<br/><span class="it lime">We built products.</span>',
+    s3_p1:'ChronoAI started as a product maker. Consumer apps. Tools people actually use. We built with AI because we believed in what it could do.',
+    s3_p2:'Then we hit the walls every AI builder hits. The tools we needed simply did not exist. So we built them. Not for a market opportunity. <span style="color:var(--white);font-weight:600">Because we were missing them ourselves.</span>',
+    s3_t1:'Wall 01', s3_c1h:'No standard way to share skills',
+    s3_c1p:'Every agent capability we needed, we rebuilt from scratch. Same as 10,000 other teams. No registry. No standard. No sharing.',
+    s3_t2:'Wall 02', s3_c2h:'No safe way to give agents access',
+    s3_c2p:'Keys in .env files. Agents with broad access. No approval layer. No audit trail. One bad deploy away from disaster.',
+    s3_t3:'Our answer', s3_c3h:'We built Ornn and NyxID',
+    s3_c3p:'The infrastructure we needed. Now it belongs to every builder who faces the same walls.',
+    s4b_eye:'Already happening',
+    s4b_h:'The headlines are already<br/><span class="it" style="color:rgba(255,68,68,0.8)">writing themselves</span>',
+    s4b_n1h:'135,000+ OpenClaw AI agents exposed online as misconfiguration fuels takeover risk',
+    s4b_n1p:'Tens of thousands of OpenClaw Agent instances found openly accessible with no authentication — API keys and full system access visible to anyone.',
+    s4b_src:'bitdefender.com →',
+    s4b_n2h:'Her AI agent nuked 200 emails. This guardrail stops the next disaster',
+    s4b_n2p:'An AI agent autonomously deleted 200 emails in a single session. No human approved it. It just ran — because nothing was stopping it.',
+    s4b_src2:'pcworld.com →',
+    s4b_n3h:'Why China\'s OpenClaw Mania Is More Than Just a Tech Craze',
+    s4b_n3p:'Local governments and tech conglomerates were the deliberate architects of the enthusiasm, while the central government was forced to hit the brakes.',
+    s4b_src3:'foreignpolicy.com →',
+    s4b_sub:'AI Agents are already doing this — right now',
+    s4b_a1:'✈️ Book your flights',
+    s4b_a2:'💳 Make purchases',
+    s4b_a3:'📧 Send emails as you',
+    s4b_a4:'💰 Process refunds',
+    s4b_a5:'🔑 Access all your accounts',
+    s4b_a6:'🗑️ Delete your data',
+    s4_head:'You are using OpenClaw.<br/>You are thinking: <span class="it lime">what if agents<br/>ran my entire business?</span>',
+    s4_gun:'Using an AI agent like OpenClaw without security is like giving your AI a loaded gun. AI agents no longer just carry out tasks — they make decisions and take real actions.',
+    s4_but:'BUT',
+    s4_t1:'Question 1', s4_c1h:'Where are your API keys?',
+    s4_c1p:'Probably in a .env file, a CI pipeline, or a Slack message. If that leaks, an attacker acts like your entire app.',
+    s4_t2:'Question 2', s4_c2h:'What is your brake pedal?',
+    s4_c2p:'Your agent can send emails, process refunds, write to production. When it does something wrong, what stops it?',
+    s4_t3:'Question 3', s4_c3h:'Who builds the tools?',
+    s4_c3p:'Every agent capability is hard-coded from scratch. You, and 10,000 other teams, rebuilding the same code this week.',
+    s5_eye:'Our answer',
+    s5_ql:'OpenClaw makes agents useful. NyxID makes them safe.',
+    s5_t1:'Capability', s5_ornn_status:'Live',
+    s5_ornn_p:'The skill registry for AI agents. Like npm, but for what agents can do. Create skills once, share them, run them in a sandboxed environment. Any agent. Any team. Stop rebuilding. Start compounding.',
+    s5_o1:'Semantic search', s5_o2:'Sandboxed runtime', s5_o3:'AI skill generation',
+    s5_t2:'Control', s5_nyx_status:'MVP Phase',
+    s5_nyx_p:'Guard the boundary. Keys never live in code. 19 providers brokered at runtime. One LLM gateway for every AI model. Before any agent takes a real action, a human approves it first. Self-hosted. Open source. MIT licensed.',
+    s5_n1:'Credential broker', s5_n2:'LLM gateway', s5_n3:'Human approval',
+    s6_eye:'Live demo',
+    s6_h1:'Watch<br/><span class="it lime">this.</span>',
+    s6_sub:'Three minutes. Three real flows.<br/>No jargon. Just what it actually does.',
+    s6_keys:'If OpenClaw can click buttons, NyxID holds the keys.',
+    s7_d1label:'01 — Keys never in code',
+    s7_before:'// Before — danger', s7_after:'// With NyxID',
+    s7_comment:'// nothing else needed.',
+    s7_d1note:'19 providers pre-configured. Keys injected at runtime. Zero exposed anywhere.',
+    s7_d2label:'02 — One LLM gateway',
+    s7_d2note:'One endpoint. Switch providers.<br/>Zero code changes.',
+    s7_d3label:'03 — Agents ask first',
+    s7_ntitle:'NyxID &nbsp;·&nbsp; Approval needed',
+    s7_nsub:'support-bot wants to:',
+    s7_nact:'"Send refund email to customer"',
+    s7_yes:'Approve', s7_no:'Deny',
+    s7_d3note:'The agent proposes.<br/>The human decides. <span style="color:var(--white);font-weight:700">Every time.</span>',
+    s8_eye:'Join us',
+    s8_h1:'Be the builders who got<br/>it right <span class="it lime">from day one</span>',
+    s8_sub:'Limited seeding member access opens tonight. Early product access, a direct line to our team, and a real voice in what we build next.',
+    s8_cta:'Sign up as a seeding member →',
+    s8_l1a:'You get', s8_l1b:'Early access to Ornn + NyxID',
+    s8_l2a:'We need', s8_l2b:'Your feedback. Your real use cases.',
+    s8_l3a:'Built for', s8_l3b:'AI builders. Solo founders. You.'
+  },
+  zh: {
+    pill:"What's Next Ep01",
+    s1_eye:'ChronoAI &nbsp;·&nbsp; 2026',
+    s1_h1a:'AI 构建者。',
+    s1_h1b:'为 AI 构建者。',
+    s1_sub:'一人公司的时代，就是现在。',
+    s2_eye:'ChronoAI，是为谁造的',
+    s2_l1:'<span class="ghost">敬</span> 那个独立创始人',
+    s2_l2:'一个人，干翻了整支十人团队。',
+    s2_l3:'<span class="ghost">敬</span> 那家一人公司',
+    s2_l4:'做到了曾经需要 <span class="it lime">五十个人</span> 才能做到的事。',
+    s2_l5:'<span class="ghost">敬</span> 每一个构建者',
+    s2_l6:'在全世界还没跟上之前，就押注了 AI。',
+    s2_l7:'<span class="it lime">我们，是为你造的。</span>',
+    s3_eye:'我们怎么走到这里的',
+    s3_h2:'我们不是先做基础设施的。<br/><span class="it lime">我们先做产品。</span>',
+    s3_p1:'ChronoAI 从做产品开始。真实的应用，真实的用户。我们用 AI 造东西，因为我们相信它能做到。',
+    s3_p2:'然后我们撞上了每个 AI 构建者都会遇到的那堵墙。我们需要的工具，压根不存在。所以我们自己造了。不是因为看到了市场机会，<span style="color:var(--white);font-weight:600">是因为我们自己也缺。</span>',
+    s3_t1:'第一堵墙', s3_c1h:'没有办法标准化地共享 Skill',
+    s3_c1p:'每个 Agent 能力都得从零写起。你，和另外一万支团队，这周都在写一样的代码。没有注册表，没有标准，没法共享。',
+    s3_t2:'第二堵墙', s3_c2h:'没法安全地给 Agent 授权',
+    s3_c2p:'密钥扔在 .env 文件里。Agent 权限大到没边。没有审批，没有日志。手滑一次，就是一场灾难。',
+    s3_t3:'我们的答案', s3_c3h:'我们造了 Ornn 和 NyxID',
+    s3_c3p:'这是我们自己需要的工具。现在，它属于每一个撞过同样那堵墙的人。',
+    s4b_eye:'正在发生',
+    s4b_h:'新闻标题，<br/><span class="it" style="color:rgba(255,68,68,0.8)">已经替自己说话了</span>',
+    s4b_n1h:'13.5 万个 OpenClaw AI Agent 暴露在公网——配置错误引发全面接管风险',
+    s4b_n1p:'数以万计的 OpenClaw Agent 实例在没有任何身份验证的情况下公开可访问——API 密钥和完整系统权限，任何人都能看到。',
+    s4b_src:'bitdefender.com →',
+    s4b_n2h:'她的 AI Agent 删了 200 封邮件。这道护栏能阻止下一场灾难。',
+    s4b_n2p:'一个 AI Agent 在一次会话中自动删除了 200 封邮件。没有人批准，没有告警。它就这么跑了——因为什么都没在拦它。',
+    s4b_src2:'pcworld.com →',
+    s4b_n3h:'中国的 OpenClaw 狂热，不只是一场科技浪潮',
+    s4b_n3p:'地方政府和科技巨头是这场热潮的幕后推手，而中央政府不得不踩下刹车。',
+    s4b_src3:'foreignpolicy.com →',
+    s4b_sub:'AI Agent 正在做的那些事——就是现在',
+    s4b_a1:'✈️ 帮你订机票',
+    s4b_a2:'💳 代你付款',
+    s4b_a3:'📧 以你的名义发邮件',
+    s4b_a4:'💰 处理退款',
+    s4b_a5:'🔑 访问你的所有账户',
+    s4b_a6:'🗑️ 删除你的数据',
+    s4_head:'你在用 OpenClaw。<br/>你心里在想：<span class="it lime">要是让 AI Agent<br/>跑我整个业务呢？</span>',
+    s4_gun:'在没有安全保障的情况下使用 OpenClaw 这样的 AI Agent，就像把一把上了膛的枪交给了 AI。AI Agent 不只是在执行任务了——它们在做决策，在采取真实行动。',
+    s4_but:'但是',
+    s4_t1:'问题一', s4_c1h:'你的 API 密钥在哪？',
+    s4_c1p:'大概在某个 .env 文件、CI 流水线，或者 Slack 消息里。一旦泄漏，攻击者就等于拿到了你整个应用的钥匙。',
+    s4_t2:'问题二', s4_c2h:'你的刹车在哪？',
+    s4_c2p:'你的 Agent 能发邮件、退款、写生产数据库。它出错的那一刻，是什么在拦它？',
+    s4_t3:'问题三', s4_c3h:'工具谁来造？',
+    s4_c3p:'每个 Agent 能力都是从零手写的。你，和另外一万支团队，这周都在重复同一件事。',
+    s5_eye:'我们的答案',
+    s5_ql:'OpenClaw 让 Agent 有能力。NyxID 让 Agent 安全。',
+    s5_t1:'能力', s5_ornn_status:'已上线',
+    s5_ornn_p:'AI Agent 的 Skill 注册表。就像 npm，但装的是 Agent 能力。Skill 写一次，发布出去，任何 Agent 都能在沙箱里找到并跑起来。不用再从零写了，让每一个 Skill 都成为你的复利。',
+    s5_o1:'语义搜索', s5_o2:'沙箱运行时', s5_o3:'AI Skill 生成',
+    s5_t2:'控制', s5_nyx_status:'MVP 阶段',
+    s5_nyx_p:'守住边界。API 密钥永远不出现在代码里。19 个服务商在运行时注入。统一的 LLM 网关。Agent 要做真实操作之前，人先在手机上拍板——批还是不批。自托管，开源，MIT 许可。',
+    s5_n1:'凭证代理', s5_n2:'LLM 网关', s5_n3:'人工审批',
+    s6_eye:'现场演示',
+    s6_h1:'来，<br/><span class="it lime">看这里。</span>',
+    s6_sub:'三分钟，三件真实的事。<br/>不讲术语，就看它到底能做什么。',
+    s6_keys:'OpenClaw 能点按钮，NyxID 就握着那把钥匙。',
+    s7_d1label:'01 — API 密钥永远不出现在代码里',
+    s7_before:'// 之前：随时可能爆', s7_after:'// 用了 NyxID',
+    s7_comment:'// 就这行，真的没别的了。',
+    s7_d1note:'19 个服务商预配好了。密钥运行时注入。代码里，什么都没有。',
+    s7_d2label:'02 — 统一 LLM 网关',
+    s7_d2note:'一个端点，随时换供应商，<br/>一行代码不用改。',
+    s7_d3label:'03 — Agent 先请示，再动',
+    s7_ntitle:'NyxID &nbsp;·&nbsp; 需要审批',
+    s7_nsub:'support-bot 想要：',
+    s7_nact:'「给客户发退款确认邮件」',
+    s7_yes:'批准', s7_no:'拒绝',
+    s7_d3note:'Agent 提议，人来拍板。<span style="color:var(--white);font-weight:700">每一次都是。</span>',
+    s8_eye:'加入我们',
+    s8_h1:'成为从第一天<br/>就走对了路的 <span class="it lime">构建者</span>',
+    s8_sub:'今晚开放少量种子用户席位。早期产品使用权，跟我们团队直接对话，真正参与决定我们下一步造什么。',
+    s8_cta:'今晚报名，成为种子用户 →',
+    s8_l1a:'你能拿到', s8_l1b:'Ornn + NyxID 早期使用权',
+    s8_l2a:'我们需要', s8_l2b:'你的反馈，你真实遇到的问题。',
+    s8_l3a:'这是为了', s8_l3b:'AI 构建者、独立创始人，还有你。'
+  }
+};
+
+// ─── LANGUAGE ENGINE ─────────────────────────────────────────────
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+  document.getElementById('btnZH').classList.toggle('active', lang === 'zh');
+  document.body.classList.toggle('zh-mode', lang === 'zh');
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (T[lang][key] !== undefined) el.innerHTML = T[lang][key];
+  });
+
+  // Update speaker notes for current slide
+  updateNotes();
+
+  // Re-trigger manifesto animation if on slide 2
+  if (currentSlide === 1) triggerManifesto();
+}
+
+// ─── SLIDE ENGINE ─────────────────────────────────────────────────
+const slides = document.querySelectorAll('.slide');
+const prog = document.getElementById('prog');
+const ctr = document.getElementById('ctr');
+const nbox = document.getElementById('nbox');
+const nbtn = document.getElementById('nbtn');
+let currentSlide = 0, nopen = false;
+
+function pad(n){return String(n).padStart(2,'0')}
+
+function updateNotes() {
+  const s = slides[currentSlide];
+  const key = currentLang === 'zh' ? 'data-notes-zh' : 'data-notes-en';
+  nbox.textContent = s.getAttribute(key) || '';
+}
+
+function triggerManifesto() {
+  const lines = document.querySelectorAll('.ml');
+  lines.forEach(l => l.classList.remove('show'));
+  setTimeout(() => lines.forEach(l => l.classList.add('show')), 100);
+}
+
+function go(i) {
+  if (i < 0 || i >= slides.length) return;
+  slides[currentSlide].classList.remove('active');
+  currentSlide = i;
+  slides[currentSlide].classList.add('active');
+  prog.style.width = (slides.length > 1 ? (currentSlide / (slides.length - 1)) * 100 : 100) + '%';
+  ctr.textContent = pad(currentSlide + 1) + ' / ' + pad(slides.length);
+  updateNotes();
+  updateDots();
+  if (currentSlide === 1) triggerManifesto();
+  if (currentSlide === 4) triggerNewsSlide();
+}
+
+// ─── NEWS SLIDE ANIMATION ─────────────────────────────────────────
+function triggerNewsSlide() {
+  // reset
+  document.querySelectorAll('.nc-card,.nc-chip,.nc-eyebrow').forEach(el => {
+    el.classList.remove('in');
+  });
+  // trigger after brief paint delay
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.querySelectorAll('.nc-card,.nc-chip,.nc-eyebrow').forEach(el => el.classList.add('in'));
+    }, 60);
+  });
+}
+
+// ─── DOT PROGRESS ─────────────────────────────────────────────────
+function buildDots() {
+  const wrap = document.createElement('div');
+  wrap.className = 'dots';
+  wrap.id = 'dotnav';
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    d.onclick = () => go(i);
+    wrap.appendChild(d);
+  });
+  document.body.appendChild(wrap);
+}
+buildDots();
+
+function updateDots() {
+  document.querySelectorAll('.dots .dot').forEach((d, i) => {
+    d.classList.toggle('on', i === currentSlide);
+  });
+}
+
+document.getElementById('prev').onclick = () => go(currentSlide - 1);
+document.getElementById('next').onclick = () => go(currentSlide + 1);
+
+nbtn.onclick = function() {
+  nopen = !nopen;
+  nbox.classList.toggle('on', nopen);
+  nbtn.textContent = nopen ? 'Hide Notes' : 'Speaker Notes';
+};
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight','Space','Enter'].includes(e.code)){e.preventDefault();go(currentSlide+1)}
+  if (['ArrowLeft','Backspace'].includes(e.code)){e.preventDefault();go(currentSlide-1)}
+  if (e.key.toLowerCase() === 'n') nbtn.click();
+  if (e.key === 'Home') go(0);
+  if (e.key === 'End') go(slides.length - 1);
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => {tx = e.touches[0].clientX}, {passive:true});
+document.addEventListener('touchend', e => {
+  const d = tx - e.changedTouches[0].clientX;
+  if (Math.abs(d) > 50) { d > 0 ? go(currentSlide+1) : go(currentSlide-1); }
+});
+
+go(0);
+</script>
+</body>
+</html>

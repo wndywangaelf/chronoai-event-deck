@@ -403,10 +403,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   <div class="slide" data-notes-en="Enough words. Three minutes. Three real things. I promise each one will change how you think about what you are building." data-notes-zh="说够了。三分钟，三件真实的事。我保证，每一件都会改变你对自己正在构建之事的看法。">
     <div class="ghost-bg" style="bottom:-20px;right:-40px">→</div>
     <div class="eye-g" data-i18n="s6_eye">Live demo</div>
-    <h1 style="font-size:clamp(48px,7.5vw,108px)" data-i18n="s6_h1">Watch<br/><span class="it lime">this.</span></h1>
+    <h1 style="font-size:clamp(48px,7.5vw,108px);white-space:nowrap" data-i18n="s6_h1">Watch <span class="it lime">this.</span></h1>
     <div class="sub" data-i18n="s6_sub">No jargon. Just what it actually does.</div>
-    <div style="width:100%;max-width:820px;margin-top:28px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);box-shadow:0 12px 48px rgba(0,0,0,0.6)">
-      <video controls playsinline style="width:100%;height:auto;display:block;background:#000;max-height:360px;object-fit:contain">
+    <div style="width:100%;max-width:920px;margin-top:16px;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);box-shadow:0 12px 48px rgba(0,0,0,0.6)">
+      <video controls playsinline style="width:100%;height:auto;display:block;background:#000;max-height:460px;object-fit:contain">
         <source src="nyxid-demo.mp4" type="video/mp4"/>
       </video>
     </div>
@@ -556,7 +556,7 @@ const T = {
     s5_nyx_p:'Guard the boundary. Keys never live in code. 19 providers brokered at runtime. One LLM gateway for every AI model. Before any agent takes a real action, a human approves it first. Self-hosted. Open source. MIT licensed.',
     s5_n1:'Credential broker', s5_n2:'LLM gateway', s5_n3:'Human approval',
     s6_eye:'Live demo',
-    s6_h1:'Watch<br/><span class="it lime">this.</span>',
+    s6_h1:'Watch <span class="it lime">this.</span>',
     s6_sub:'No jargon. Just what it actually does.',
     s6_keys:'If OpenClaw can click buttons, NyxID holds the keys.',
     s7_d1label:'01 — Keys never in code',
